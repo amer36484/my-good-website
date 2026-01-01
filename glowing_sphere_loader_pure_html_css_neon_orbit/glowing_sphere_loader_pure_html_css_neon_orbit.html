@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Saturn Loader • Pure HTML & CSS</title>
+  <style>
+    :root{
+      --bg: #0a0b10;
+      --core-color: #f5d76e;
+      --ring1-color: #f7a855;
+      --ring2-color: #ff9f43;
+      --ring3-color: #ff6b6b;
+      --core-size: 0px;
+      --ring1: 0px;
+      --ring2: 0px;
+      --ring3: 0px;
+      --final-core-size: 120px;
+      --final-ring1: 180px;
+      --final-ring2: 240px;
+      --final-ring3: 300px;
+    }
+
+    html, body{
+      height: 100%;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 800px at 50% 40%, #101224 10%, var(--bg) 60%, #000 100%);
+    }
+
+    .loader{
+      position: relative;
+      width: var(--final-ring3);
+      height: var(--final-ring3);
+    }
+
+    .core{
+      width: var(--core-size);
+      height: var(--core-size);
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff, var(--core-color) 40%, transparent 70%);
+      box-shadow: 0 0 20px var(--core-color), 0 0 40px var(--core-color), 0 0 80px var(--core-color);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      transition: width 5s, height 5s;
+    }
+
+    .orbit{
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      border-radius: 50%;
+      transition: transform 5s ease-in-out, width 5s, height 5s;
+    }
+
+    .orbit .ring{
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid currentColor;
+      box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
+    }
+
+    .o1{ width: var(--ring1); height: var(--ring1); color: var(--ring1-color); }
+    .o2{ width: var(--ring2); height: var(--ring2); color: var(--ring2-color); }
+    .o3{ width: var(--ring3); height: var(--ring3); color: var(--ring3-color); }
+
+    .story-text{
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+    }
+  </style>
+  <script>
+    window.addEventListener('load', () => {
+      const storyText = document.querySelector('.story-text');
+      const core = document.querySelector('.core');
+      const o1 = document.querySelector('.o1');
+      const o2 = document.querySelector('.o2');
+      const o3 = document.querySelector('.o3');
+
+      // Core yavaşça büyür
+      storyText.textContent = '4.6 billion years ago, Saturn started to form.';
+      setTimeout(() => {
+        core.style.width = '120px';
+        core.style.height = '120px';
+      }, 500);
+
+      // Halkalar yavaşça açılır
+      setTimeout(() => {
+        o1.style.width = '180px';
+        o1.style.height = '180px';
+        o1.style.transform = 'translate(-50%, -50%) scale(1)';
+        o2.style.width = '240px';
+        o2.style.height = '240px';
+        o2.style.transform = 'translate(-50%, -50%) scale(1)';
+        o3.style.width = '300px';
+        o3.style.height = '300px';
+        o3.style.transform = 'translate(-50%, -50%) scale(1)';
+        storyText.textContent = '100 million years later, rings slowly formed.';
+      }, 7000);
+
+      // Halkalar yavaşça kaybolur
+      setTimeout(() => {
+        o1.style.transform = 'translate(-50%, -50%) scale(0)';
+        o2.style.transform = 'translate(-50%, -50%) scale(0)';
+        o3.style.transform = 'translate(-50%, -50%) scale(0)';
+        storyText.textContent = ' From today to 300 million years later, the rings will disappear.';
+      }, 17000);
+    });
+  </script>
+</head>
+<body>
+  <div class="loader">
+    <div class="core"></div>
+    <div class="orbit o1"><div class="ring"></div></div>
+    <div class="orbit o2"><div class="ring"></div></div>
+    <div class="orbit o3"><div class="ring"></div></div>
+  </div>
+  <div class="story-text">4.6 billion years ago, Saturn started to form.</div>
+</body>
+</html>

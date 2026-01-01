@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Black Hole Eats Planets</title>
+  <style>
+    body {
+      background: black;
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .universe {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Kara delik */
+    .blackhole {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, black 70%, darkblue 85%, orange 95%);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 80px orange, 0 0 160px yellow;
+    }
+
+    /* Gezegenler */
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      animation: fall 12s forwards;
+    }
+
+    .mercury { width: 10px; height: 10px; background: gray; left: 10%; top: 20%; animation-delay: 0s; }
+    .venus { width: 16px; height: 16px; background: khaki; left: 90%; top: 30%; animation-delay: 1s; }
+    .earth { width: 18px; height: 18px; background: cyan; left: 20%; top: 80%; animation-delay: 2s; }
+    .mars { width: 14px; height: 14px; background: red; left: 80%; top: 70%; animation-delay: 3s; }
+    .jupiter { width: 40px; height: 40px; background: orange; left: 5%; top: 50%; animation-delay: 4s; }
+    .saturn { width: 34px; height: 34px; background: goldenrod; left: 95%; top: 50%; animation-delay: 5s; }
+    .uranus { width: 26px; height: 26px; background: lightblue; left: 30%; top: 5%; animation-delay: 6s; }
+    .neptune { width: 26px; height: 26px; background: blue; left: 70%; top: 95%; animation-delay: 7s; }
+
+    /* Kara deliğe düşüş animasyonu */
+    @keyframes fall {
+      0% { transform: scale(1); opacity: 1; }
+      70% { transform: translate(calc(50vw - 50%), calc(50vh - 50%)) scale(0.5); opacity: 1; }
+      100% { transform: translate(0,0) scale(0); opacity: 0; left: 50%; top: 50%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="universe">
+    <div class="blackhole"></div>
+
+    <!-- Gezegenler -->
+    <div class="planet mercury"></div>
+    <div class="planet venus"></div>
+    <div class="planet earth"></div>
+    <div class="planet mars"></div>
+    <div class="planet jupiter"></div>
+    <div class="planet saturn"></div>
+    <div class="planet uranus"></div>
+    <div class="planet neptune"></div>
+  </div>
+</body>
+</html>

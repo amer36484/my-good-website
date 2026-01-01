@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mani's Fresh Market — Enhanced</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">🥕 Mani's Fresh Market</div>
+    <nav class="nav">
+      <a href="account.html" id="account-link">My Account</a>
+    </nav>
+    <div class="cart-summary" id="cart-summary">
+      <span id="cart-count">0</span> items • <span id="cart-total">$0.00</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Shop like you're at the real market</h1>
+      <p>Fresh produce with product images, categories, 3D tilt, and a checkout form. Demo — orders stored locally.</p>
+      <div class="filters">
+        <button class="filter-btn active" data-cat="all">All</button>
+        <button class="filter-btn" data-cat="fruits">Fruits</button>
+        <button class="filter-btn" data-cat="veggies">Vegetables</button>
+        <button class="filter-btn" data-cat="organic">Organic</button>
+      </div>
+    </section>
+
+    <section class="products" id="products" aria-live="polite">
+      <!-- Product cards inserted by JavaScript -->
+    </section>
+
+    <aside class="cart" id="cart">
+      <h2>Cart</h2>
+      <div id="cart-items" role="list"></div>
+      <div class="cart-footer">
+        <div class="totals">
+          <div>Subtotal: <span id="subtotal">$0.00</span></div>
+          <div>Tax (8%): <span id="tax-amount">$0.00</span></div>
+          <div id="discount-row" style="display:none">Discount: <span id="discount-amount">-$0.00</span></div>
+          <div class="grand">Total: <strong id="grand-total">$0.00</strong></div>
+        </div>
+        <button id="checkout-btn" class="checkout" onclick="openCheckout()">Checkout</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <small>Mani's Fresh Market — demo, no real payments.</small>
+  </footer>
+
+  <!-- Checkout modal -->
+  <div id="checkout-modal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <h3 id="checkout-title">Checkout</h3>
+      <form id="checkout-form" onsubmit="submitCheckout(event)">
+        <label>Full name
+          <input name="fullname" required placeholder="Jane Doe">
+        </label>
+        <label>Email
+          <input name="email" type="email" required placeholder="you@example.com">
+        </label>
+        <label>Address
+          <input name="address" required placeholder="Street, City, Country">
+        </label>
+        <label>Payment (demo)
+          <input name="card" required placeholder="Card number (demo)">
+        </label>
+        <div class="checkout-summary">
+          <div>Payable: <strong id="checkout-total">$0.00</strong></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" onclick="closeCheckout()">Cancel</button>
+          <button type="submit" class="primary">Pay (demo)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

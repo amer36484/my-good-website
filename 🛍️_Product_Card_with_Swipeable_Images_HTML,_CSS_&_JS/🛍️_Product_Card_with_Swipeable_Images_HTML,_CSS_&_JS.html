@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Product Card with Swipeable Images</title>
+    <!-- link CSS file to HTML file -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="product-card">
+        <!-- Color Options -->
+         <div class="color-options">
+            <label for="">Color:</label>
+            <div class="color-option red">
+                <input type="radio" id="color-red" name="color" value="red">
+                <label for="color-red"></label>
+            </div>
+            <div class="color-option purple">
+                <input type="radio" id="color-purple" name="color" value="purple" checked>
+                <label for="color-purple"></label>
+            </div>
+            <div class="color-option green">
+                <input type="radio" id="color-green" name="color" value="green">
+                <label for="color-green"></label>
+            </div>
+            <div class="color-option black">
+                <input type="radio" id="color-black" name="color" value="black">
+                <label for="color-black"></label>
+            </div>
+            <div class="color-option yellow">
+                <input type="radio" id="color-yellow" name="color" value="yellow">
+                <label for="color-yellow"></label>
+            </div>
+            <div class="color-option pink">
+                <input type="radio" id="color-pink" name="color" value="pink">
+                <label for="color-pink"></label>
+            </div>
+            
+            
+         </div>
+                  <!-- Product details -->
+          <div class="product-images">
+          
+            <img src="red.png" alt="pink Product" class="red active">
+            <img src="purple.png" alt="Purple Product" class="purple ">
+            <img src="green.png" alt="Green Product" class="green">
+            <img src="black.png" alt="Black Product" class="black">
+            <img src="yellow.png" alt="yellow Product" class="yellow">
+            <img src="pink.png" alt="pink Product" class="pink">
+          </div>
+          <div class="product-title">Sports shoes</div>
+            <div class="product-tax"> tax of the shoes $19.00</div>
+           <div class="product-price"> 50% off today $10.99</div>
+           <div class="product-price-total"> total of the shoes price 29.99 </div>
+           <button class="add-to-cart">Add to Cart</button>
+    </div>
+  </body>
+  <!-- link JavaScript file to HTML file -->
+  <script src="script.js"></script>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Alpha Centauri System</title>
+  <style>
+    body {
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .system {
+      position: relative;
+      width: 800px;
+      height: 800px;
+    }
+
+    /* Yıldızlar */
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .star.a { width: 60px; height: 60px; background: yellow; left: 30%; top: 50%; }
+    .star.b { width: 45px; height: 45px; background: orange; left: 50%; top: 50%; }
+    .star.proxima { width: 25px; height: 25px; background: red; left: 75%; top: 75%; }
+
+    /* Yörüngeler */
+    .orbit {
+      position: absolute;
+      border: 1px dashed rgba(255,255,255,0.3);
+      border-radius: 50%;
+      animation: rotate linear infinite;
+    }
+
+    /* Proxima d */
+    .orbit.d {
+      width: 60px; height: 60px;
+      left: calc(75% - 30px);
+      top: calc(75% - 30px);
+      animation-duration: 4s;
+    }
+
+    /* Proxima b */
+    .orbit.b {
+      width: 120px; height: 120px;
+      left: calc(75% - 60px);
+      top: calc(75% - 60px);
+      animation-duration: 10s;
+    }
+
+    /* Proxima c */
+    .orbit.c {
+      width: 200px; height: 200px;
+      left: calc(75% - 100px);
+      top: calc(75% - 100px);
+      animation-duration: 20s;
+    }
+
+    /* Gezegenler */
+    .planet {
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .planet.d { width: 6px; height: 6px; background: lightgray; }
+    .planet.b { width: 12px; height: 12px; background: cyan; }
+    .planet.c { width: 16px; height: 16px; background: green; }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Yazılar */
+    .label {
+      position: absolute;
+      font-size: 12px;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+
+    .label.a { left: 30%; top: 45%; }
+    .label.b { left: 50%; top: 45%; }
+    .label.proxima { left: 75%; top: 70%; }
+  </style>
+</head>
+<body>
+  <div class="system">
+    <!-- Yıldızlar -->
+    <div class="star a"></div>
+    <div class="star b"></div>
+    <div class="star proxima"></div>
+
+    <!-- Etiketler -->
+    <div class="label a">Alpha Centauri A</div>
+    <div class="label b">Alpha Centauri B</div>
+    <div class="label proxima">Proxima Centauri</div>
+
+    <!-- Proxima d -->
+    <div class="orbit d">
+      <div class="planet d"></div>
+    </div>
+
+    <!-- Proxima b -->
+    <div class="orbit b">
+      <div class="planet b"></div>
+    </div>
+
+    <!-- Proxima c -->
+    <div class="orbit c">
+      <div class="planet c"></div>
+    </div>
+  </div>
+</body>
+</html>

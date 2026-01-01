@@ -1,0 +1,143 @@
+/* Genel ayarlar */
+body {
+  margin: 0;
+  background: black;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.solar-system {
+  position: relative;
+  width: 1200px;
+  height: 1200px;
+}
+
+/* Güneş */
+.sun {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, yellow, orange, red);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  box-shadow: 0 0 60px yellow;
+  transition: all 2s ease-in-out;
+}
+
+.sun.appear {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* Süpernova animasyonu */
+.sun.supernova {
+  animation: explode 2s ease-in-out forwards;
+  box-shadow: 0 0 200px orange, 0 0 400px red, 0 0 600px yellow;
+}
+
+@keyframes explode {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(2.5); }
+  100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+
+/* Orbitler */
+.orbit {
+  position: absolute;
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Gezegenler */
+.planet {
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 0;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 2s ease-in-out, opacity 2s ease-in-out;
+}
+
+/* Gezegen görünme animasyonu */
+.planet.appear {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* Orbit boyutları ve dönüş hızları */
+.mercury { width: 180px; height: 180px; animation: orbit 6s linear infinite; }
+.venus { width: 260px; height: 260px; animation: orbit 10s linear infinite; }
+.earth { width: 340px; height: 340px; animation: orbit 14s linear infinite; }
+.mars { width: 420px; height: 420px; animation: orbit 18s linear infinite; }
+.jupiter { width: 520px; height: 520px; animation: orbit 30s linear infinite; }
+.saturn { width: 620px; height: 620px; animation: orbit 40s linear infinite; }
+.uranus { width: 720px; height: 720px; animation: orbit 50s linear infinite; }
+.neptune { width: 820px; height: 820px; animation: orbit 60s linear infinite; }
+.pluto { width: 920px; height: 920px; animation: orbit 70s linear infinite; }
+
+/* Gezegen renkleri ve boyutları */
+.mercury-planet { width: 12px; height: 12px; background: gray; }
+.venus-planet { width: 20px; height: 20px; background: goldenrod; }
+.earth-planet { width: 22px; height: 22px; background: dodgerblue; }
+.mars-planet { width: 16px; height: 16px; background: red; }
+.jupiter-planet { width: 40px; height: 40px; background: peru; }
+.saturn-planet { width: 36px; height: 36px; background: khaki; position: relative; }
+.uranus-planet { width: 28px; height: 28px; background: lightseagreen; }
+.neptune-planet { width: 28px; height: 28px; background: royalblue; }
+.pluto-planet { width: 14px; height: 14px; background: lightgray; }
+
+/* Satürn halkası */
+.ring {
+  position: absolute;
+  width: 70px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(25deg);
+}
+
+/* Aylar */
+.moon-orbit {
+  position: absolute;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  animation: orbit 3s linear infinite;
+}
+.moon {
+  width: 6px; height: 6px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 0;
+  transform: translate(-50%, -50%);
+}
+
+/* Kuiper ve asteroid beltleri */
+.asteroid-belt, .kuiper-belt {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.asteroid-belt {
+  width: 470px; height: 470px;
+  box-shadow: 0 0 2px white, 20px 30px 2px gray, -30px -10px 2px white, 50px -20px 2px lightgray;
+}
+
+.kuiper-belt {
+  width: 1000px; height: 1000px;
+  box-shadow: 0 0 2px white, 40px 60px 2px lightgray, -50px -30px 2px gray, 70px -50px 2px white;
+}
+
+/* Dönme animasyonu */
+@keyframes orbit {
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Account - Mani's Market</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">🥕 Mani's Fresh Market</div>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+    </nav>
+    <div class="cart-summary" id="cart-summary">
+      <span id="cart-count">0</span> items • <span id="cart-total">$0.00</span>
+    </div>
+  </header>
+
+  <main style="max-width:900px; margin:28px auto; padding:0 18px;">
+    <section class="hero">
+      <h1>My Account</h1>
+      <p>Your recent orders are listed below. Orders are stored locally (browser storage) in this demo.</p>
+    </section>
+
+    <section id="orders-list" style="margin-top:18px;">
+      <!-- Orders inserted by JS -->
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Mani's Fresh Market — demo account area.</small>
+  </footer>
+
+  <script>
+    function fmt(v){ return '$' + v.toFixed(2); }
+    const params = new URLSearchParams(location.search);
+    const focusOrderId = params.get('order');
+
+    // Read orders from localStorage and display
+    const orders = JSON.parse(localStorage.getItem('market_orders') || '[]');
+    const ordersRoot = document.getElementById('orders-list');
+
+    if(orders.length === 0){
+      ordersRoot.innerHTML = '<div style="padding:18px; color:#718096">You have no orders yet.</div>';
+    } else {
+      orders.slice().reverse().forEach(o => {
+        const box = document.createElement('div');
+        box.style.borderRadius = '12px';
+        box.style.padding = '14px';
+        box.style.marginBottom = '12px';
+        box.style.boxShadow = '0 8px 20px rgba(2,6,23,0.04)';
+        box.style.background = '#fff';
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+            <div><strong>Order ${o.id}</strong><div style="color:#718096; font-size:0.95rem">${new Date(o.createdAt).toLocaleString()}</div></div>
+            <div style="text-align:right">Total: <strong>${fmt(o.total)}</strong></div>
+          </div>
+          <div style="margin-top:10px">
+            ${o.items.map(it=>`<div style="display:flex; justify-content:space-between; padding:6px 0"><div>${it.name} × ${it.qty}</div><div>${fmt(it.lineTotal)}</div></div>`).join('')}
+          </div>
+          <div style="margin-top:8px; color:#374151">Customer: ${o.customer.fullname} • ${o.customer.email}</div>
+        `;
+        if(focusOrderId && focusOrderId === o.id){
+          box.style.border = '2px solid #10b981';
+        }
+        ordersRoot.appendChild(box);
+      });
+    }
+
+    // Update header cart summary from any saved cart
+    const cart = JSON.parse(localStorage.getItem('market_cart') || '{}');
+    const products = {$JSONstringify}(products);
+    const subtotal = Object.keys(cart).reduce((s,id)=>{
+      const p = products.find(x=>x.id===Number(id));
+      return s + (p ? p.price * cart[id] : 0);
+    }, 0);
+    document.getElementById('cart-count').textContent = Object.values(cart).reduce((s,n)=>s+n,0);
+    document.getElementById('cart-total').textContent = fmt(subtotal);
+  </script>
+</body>
+</html>
