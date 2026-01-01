@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Claude AI-style 3D DNA Helix</title>
+  <style>
+    html,body{height:100%;margin:0;background:#0a0a0d;color:#fff;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;overflow:hidden}
+    canvas{display:block;width:100vw;height:100vh}
+    .ui{position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);padding:12px;border-radius:8px;font-size:14px;z-index:10;}
+    .ui label{display:flex;align-items:center;gap:8px}
+    .ui input[type=range]{width:180px}
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="ui">
+    <label>Speed <input id="speed" type="range" min="0.1" max="3" step="0.05" value="1"></label>
+    <label>Radius <input id="radius" type="range" min="30" max="220" step="1" value="110"></label>
+    <label>Segments <input id="segments" type="range" min="12" max="200" step="1" value="80"></label>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+    const DPR = Math.max(1, window.devicePixelRatio || 1);
+    let W=0,H=0,CX=0,CY=0;
+
+    const gui = {speed: document.getElementById('speed'), radius: document.getElementById('radius'), segments: document.getElementById('segments')};
+
+    const lerp = (a,b,t)=>a+(b-a)*t;
+    const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+    let settings = {speed:parseFloat(gui.speed.value), radius:parseFloat(gui.radius.value), segments:parseInt(gui.segments.value), strandOffset:Math.PI, helixTurns:3, dotSize:4, fov:900, camZ:600};
+
+    let basePoints=[];
+
+    function resize(){
+      W=innerWidth; H=innerHeight; CX=W/2; CY=H/2;
+      canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      basePoints = makeHelixPoints(settings.segments);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    gui.speed.addEventListener('input',()=>settings.speed=parseFloat(gui.speed.value));
+    gui.radius.addEventListener('input',()=>settings.radius=parseFloat(gui.radius.value));
+    gui.segments.addEventListener('input',()=>{settings.segments=parseInt(gui.segments.value); basePoints=makeHelixPoints(settings.segments);});
+
+    function makeHelixPoints(segments){
+      const pts=[];
+      if(segments<2)segments=2;
+      for(let i=0;i<segments;i++){
+        const t=i/(segments-1), y=lerp(-H*0.45,H*0.45,t), angleBase=t*settings.helixTurns*Math.PI*2;
+        pts.push({t,y,angleBase});
+      }
+      return pts;
+    }
+
+    function project(x,y,z){
+      const s=settings.fov/(settings.fov+z-settings.camZ/2);
+      return {x:CX+x*s,y:CY+y*s,s:s,z:z};
+    }
+
+    function hslToRgb(h,s,l){
+      let r,g,b;
+      if(s===0){r=g=b=l;} else{
+        const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
+        const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+        r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3);
+      }
+      return {r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};
+    }
+
+    function gradientColor(t,strand=0){
+      const h=lerp(190,320,t),s=strand===0?73:85,l=lerp(55,40,t);
+      return hslToRgb(h/360,s/100,l/100);
+    }
+
+    function drawRung(a,b,scale,t){
+      const alpha=clamp((scale-0.3)*1.2,0.08,0.95)*(0.6+0.4*t);
+      const width=clamp(1.2*scale,0.6,5);
+      const color=gradientColor(t);
+      ctx.lineWidth=width; ctx.strokeStyle=`rgba(${color.r},${color.g},${color.b},${alpha})`;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      ctx.beginPath(); ctx.arc((a.x+b.x)/2,(a.y+b.y)/2,Math.max(0.8,1.8*scale),0,Math.PI*2); ctx.fillStyle=`rgba(${color.r},${color.g},${color.b},${alpha*0.08})`; ctx.fill();
+    }
+
+    function drawDot(p,scale,t,strand){
+      if(!p) return;
+      const color=gradientColor(t,strand);
+      const radius=Math.max(1.2,settings.dotSize*scale*(strand===0?0.9:1.05));
+      const alpha=clamp((scale-0.2)*1.3,0.04,1)*(strand===0?0.95:0.9);
+      ctx.beginPath(); ctx.arc(p.x+p.s*2.2,p.y+p.s*2.2,radius*1.1,0,Math.PI*2); ctx.fillStyle=`rgba(0,0,0,${0.18*alpha})`; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,radius,0,Math.PI*2); ctx.fillStyle=`rgba(${color.r},${color.g},${color.b},${alpha})`; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x-radius*0.35,p.y-radius*0.45,Math.max(0.3,radius*0.45),0,Math.PI*2); ctx.fillStyle=`rgba(255,255,255,${0.18*alpha})`; ctx.fill();
+    }
+
+    let time=0, last=performance.now();
+    function frame(now){
+      const dt=now-last; last=now; time+=dt*0.001*settings.speed;
+      ctx.clearRect(0,0,W,H);
+      const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0b0c11'); g.addColorStop(1,'#020206'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      const rotation=time*0.5;
+      const drawItems=[];
+      if(basePoints && basePoints.length>0){
+        for(let i=0;i<settings.segments;i++){
+          const p=basePoints[i]; if(!p) continue;
+          const ang=p.angleBase+time*2.0;
+          const xA=Math.cos(ang)*settings.radius,zA=Math.sin(ang)*settings.radius,yA=p.y;
+          const xB=Math.cos(ang+settings.strandOffset)*settings.radius,zB=Math.sin(ang+settings.strandOffset)*settings.radius,yB=p.y;
+          const cosR=Math.cos(rotation), sinR=Math.sin(rotation);
+          const rxA=xA*cosR+zA*sinR, rzA=-xA*sinR+zA*cosR;
+          const rxB=xB*cosR+zB*sinR, rzB=-xB*sinR+zB*cosR;
+          const projA=project(rxA,yA,rzA+settings.camZ);
+          const projB=project(rxB,yB,rzB+settings.camZ);
+          const depthScale=clamp((projA.s+projB.s)*0.5,0.2,1.6);
+          drawItems.push({a:projA,b:projB,scale:depthScale,idx:i});
+          drawItems.push({p:projA,scale:projA.s,idx:i,strand:0});
+          drawItems.push({p:projB,scale:projB.s,idx:i,strand:1});
+        }
+      }
+      drawItems.sort((A,B)=> (A.p?A.p.z:(A.a?.z+B.b?.z)/2)-(B.p?B.p.z:(B.a?.z+B.b?.z)/2));
+      drawItems.forEach(item=>{if(item.a) drawRung(item.a,item.b,item.scale,item.idx/settings.segments-1); else drawDot(item.p,item.scale,item.idx/settings.segments-1,item.strand);});
+      ctx.globalCompositeOperation='lighter'; ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation='source-over';
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    (function ambient(){
+      const start=Date.now();
+      (function tick(){
+        settings.radius=parseFloat(gui.radius.value)*(1+Math.sin((Date.now()-start)/3700)*0.06);
+        requestAnimationFrame(tick);
+      })();
+    })();
+  </script>
+</body>
+</html>

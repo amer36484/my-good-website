@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D DNA Double Helix Animation</title>
+    <style>
+        /*
+        ===================
+        CSS STYLES
+        ===================
+        */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #0d1a26; /* Dark background */
+            perspective: 800px; /* Establishes the 3D viewing perspective */
+            overflow: hidden;
+        }
+
+        .dna-container {
+            width: 300px;
+            height: 600px;
+            /* Enable 3D transformations for children */
+            transform-style: preserve-3d;
+        }
+
+        .dna-segment {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            /* Center the element */
+            margin-left: -5px;
+            margin-top: -5px;
+            border-radius: 50%;
+            background: #4A90E2; /* Base color for the helix strand (blue) */
+            box-shadow: 0 0 5px #4A90E2;
+            /* Initial 3D transformation, to be overwritten by JS */
+            transform-origin: 0 0;
+            transform: translateZ(0) rotateY(0);
+        }
+
+        .dna-segment.dot-pair::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #50E3C2; /* Color for the paired dot (teal) */
+            box-shadow: 0 0 5px #50E3C2;
+            /* The paired dot is offset in X and Z space */
+            transform: translate3d(50px, 0, 0); /* Separates the dots */
+        }
+        
+        .dna-segment .connector {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.4); /* White-ish line */
+            transform-origin: 0 50%;
+            /* Initial transformation, to be overwritten by JS */
+            transform: rotateY(90deg) translateZ(0);
+        }
+
+        /* This is the main CSS animation for continuous vertical rotation.
+        The individual segment placement is handled by JS.
+        */
+        .dna-container {
+            animation: rotateDNA 20s linear infinite; /* 20s rotation speed */
+        }
+
+        @keyframes rotateDNA {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dna-container">
+        </div>
+
+    <script>
+        /*
+        ===================
+        JAVASCRIPT CODE
+        ===================
+        */
+        const container = document.querySelector('.dna-container');
+        const numSegments = 50; // Number of base pairs in the helix
+        const amplitude = 50; // Radius of the helix (X/Z distance from center)
+        const totalHeight = 500; // Total height of the helix in pixels
+        const segmentSpacing = totalHeight / numSegments; // Vertical space between segments
+
+        // Generate the DNA structure (dots and lines)
+        for (let i = 0; i < numSegments; i++) {
+            // Calculate the position and rotation for the current segment
+            const y = i * segmentSpacing; // Vertical position
+            const angle = i * (Math.PI / 8); // Angle in radians (for the twist)
+
+            // --- 1. Create the Dot Pair (Base Pair) ---
+            const segmentDiv = document.createElement('div');
+            segmentDiv.classList.add('dna-segment', 'dot-pair');
+            // The segment is positioned relative to the container center
+            segmentDiv.style.transform = `
+                translate3d(-50%, -50%, 0) /* Center the segment */
+                translateY(${y}px)         /* Position vertically */
+                rotateY(${angle * (180 / Math.PI)}deg) /* Rotate to twist the helix */
+                translateZ(${amplitude}px) /* Move out on the Z-axis (radius) */
+            `;
+            
+            // --- 2. Create the Connector Line (Sugar-Phosphate Backbone) ---
+            // This connects the current dot pair to the next one, creating the helix curve
+            if (i < numSegments - 1) {
+                const connectorDiv = document.createElement('div');
+                connectorDiv.classList.add('connector');
+
+                // Connector position is slightly offset from the dot's origin for better visual alignment
+                connectorDiv.style.top = `${y}px`;
+                connectorDiv.style.left = `50%`;
+
+                // Calculate the 3D position and rotation for the connector
+                const nextY = (i + 1) * segmentSpacing;
+                const nextAngle = (i + 1) * (Math.PI / 8);
+
+                // Calculate the distance (hypotenuse) between the current and next point
+                const dx = amplitude * (Math.cos(nextAngle) - Math.cos(angle));
+                const dy = nextY - y;
+                const dz = amplitude * (Math.sin(nextAngle) - Math.sin(angle));
+                const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                
+                connectorDiv.style.width = `${distance}px`;
+
+                // Calculate the rotation needed to point the connector to the next segment in 3D space
+                const xzDistance = Math.sqrt(dx * dx + dz * dz);
+                const angleX = Math.atan2(dy, xzDistance) * (180 / Math.PI);
+                const angleY = Math.atan2(dx, dz) * (180 / Math.PI) + 90; // Y rotation for the twist
+
+                connectorDiv.style.transform = `
+                    translate3d(-50%, 0, 0)
+                    translateY(${y + segmentSpacing / 2}px) /* Adjust for connector height */
+                    rotateY(${angleY}deg)
+                    rotateX(${angleX}deg)
+                    translateZ(${amplitude}px)
+                `;
+                
+                container.appendChild(connectorDiv);
+            }
+            
+            container.appendChild(segmentDiv);
+        }
+    </script>
+</body>
+</html>

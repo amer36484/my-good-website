@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rock Paper Scissors</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- استایل بازی خودت -->
+  <link rel="stylesheet" href="styles/12-rock-paper-scissors.css" />
+
+  <!-- Font Awesome برای آیکن‌ها (اختیاری) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+  <style>
+    :root {
+      --card: #ffffff;
+      --muted: #f5f7fb;
+      --text: #1f2937;
+      --ok: #10b981;
+      --warn: #f59e0b;
+      --err: #ef4444;
+      --primary: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 12px; font-family: system-ui, Arial, sans-serif;
+      color: var(--text); background: #f3f4f6; text-align: center;
+    }
+    .wrap {
+      max-width: 720px; margin: 0 auto;
+    }
+    .card {
+      background: var(--card); border-radius: 16px; padding: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.06);
+      margin-bottom: 16px;
+    }
+    .row {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+    }
+    .btn {
+      appearance: none; border: 0; padding: 10px 14px; border-radius: 10px;
+      background: var(--primary); color: #fff; font-weight: 600; cursor: pointer;
+    }
+    .btn[disabled] { opacity: .5; cursor: not-allowed; }
+    .btn.outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .status-pill {
+      display: inline-flex; gap: 6px; align-items: center; padding: 6px 10px; border-radius: 999px;
+      font-size: 14px; background: var(--muted);
+    }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .err { color: var(--err); }
+    .profile {
+      display: inline-flex; align-items: center; gap: 10px; font-weight: 600;
+    }
+    .profile img {
+      width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .small { font-size: 12px; opacity: .8; }
+
+    /* ریسپانسیو */
+    @media (max-width: 600px) {
+      .title { font-size: 1.25rem; }
+      .move-button img { width: 64px; height: 64px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- کارت ورود و کیف پول -->
+    <div class="card" id="login-wallet-card">
+      <h2 style="margin: 4px 0 12px">Login & Wallet</h2>
+
+      <!-- ردیف گوگل -->
+      <div class="row" style="margin-bottom: 8px">
+        <!-- Google Login Button rendered by GIS -->
+        <div id="g_id_onload"
+             data-client_id="32330940844-bcjqujqh3gov0fjpk1dmk8trg5jhvprh.apps.googleusercontent.com"
+             data-callback="handleGoogleResponse"
+             data-auto_prompt="false"></div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="rectangular"
+             data-theme="filled_blue"
+             data-size="large"
+             data-text="signin_with"
+             data-logo_alignment="left"></div>
+
+        <!-- پروفایل کاربر گوگل -->
+        <div id="user-info" class="profile" style="display:none;">
+          <img id="user-avatar" alt="Profile" />
+          <span id="user-name"></span>
+        </div>
+
+        <!-- وضعیت گوگل -->
+        <span id="google-status" class="status-pill">
+          <i class="fa-regular fa-circle-dot"></i>
+          <span>Google: <b>Not logged in</b></span>
+        </span>
+      </div>
+
+      <!-- ردیف کیف پول -->
+      <div class="row" style="margin-top: 8px">
+        <button id="connect-wallet" class="btn">
+          <i class="fa-solid fa-wallet"></i> Connect Wallet
+        </button>
+
+        <span id="wallet-status" class="status-pill">
+          <i class="fa-regular fa-circle-dot"></i>
+          <span>Wallet: <b>Disconnected</b></span>
+        </span>
+
+        <div id="wallet-box" style="display:none;">
+          <div class="row">
+            <span class="mono" id="wallet-address"></span>
+            <button id="copy-address" class="btn outline small">Copy</button>
+          </div>
+          <div class="small" id="network-info"></div>
+        </div>
+      </div>
+
+      <!-- خروج کلی -->
+      <div class="row" style="margin-top: 10px;">
+        <button id="logout-all" class="btn outline"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+      </div>
+      <div class="small" style="margin-top:8px; opacity:.75;">
+To activate the game, you must log in with both Google and connect your wallet.
+      </div>
+    </div>
+
+    <!-- کارت بازی -->
+    <div class="card">
+      <p class="title">Rock Paper Scissors</p>
+
+      <button class="move-button js-rock-button" disabled>
+        <img src="images/rock-emoji.png" class="move-icon" alt="Rock">
+      </button>
+      <button class="move-button js-paper-button" disabled>
+        <img src="images/paper-emoji.png" class="move-icon" alt="Paper">
+      </button>
+      <button class="move-button js-scissors-button" disabled>
+        <img src="images/scissors-emoji.png" class="move-icon" alt="Scissors">
+      </button>
+
+      <p class="js-result result"></p>
+      <p class="js-moves"></p>
+      <p class="js-score score"></p>
+
+      <button
+        onclick="
+          score.wins = 0;
+          score.losses = 0;
+          score.ties = 0;
+          localStorage.removeItem('score');
+          updateScoreElement();
+        "
+        class="reset-score-button js-reset-score-button" disabled>Reset Score</button>
+
+      <button class="auto-play-button js-auto-play" disabled>Auto Play</button>
+    </div>
+  </div>
+
+  <!-- اسکریپت بازی خودت -->
+  <script src="styles/12-rock-paper-scissors.js"></script>
+
+  <!-- Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    /* -----------------------
+       وضعیت‌های سراسری
+    ----------------------- */
+    let isLoggedIn = false;
+    let walletConnected = false;
+    const REQUIRED_CHAIN_HEX = '0x1'; // Ethereum Mainnet (می‌تونی مثلاً 0x89 برای Polygon بذاری)
+
+    /* -----------------------
+       ابزارهای UI
+    ----------------------- */
+    function shortAddr(addr) {
+      if (!addr) return '';
+      return addr.slice(0, 6) + '...' + addr.slice(-4);
+    }
+
+    function enableGameIfReady() {
+      const allGood = isLoggedIn && walletConnected;
+      document.querySelectorAll('button').forEach(btn => {
+        const isControl = btn.id === 'connect-wallet' || btn.id === 'logout-all' || btn.id === 'copy-address';
+        if (isControl) return;
+        btn.disabled = !allGood;
+      });
+    }
+
+    function setGoogleStatus(ok, name = '', picture = '') {
+      const pill = document.getElementById('google-status');
+      if (ok) {
+        pill.classList.remove('warn','err');
+        pill.classList.add('ok');
+        pill.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Google: <b>Logged in</b></span>';
+        // نمایش پروفایل
+        const ui = document.getElementById('user-info');
+        const avatar = document.getElementById('user-avatar');
+        const uname = document.getElementById('user-name');
+        avatar.src = picture || '';
+        uname.textContent = name || '';
+        ui.style.display = 'inline-flex';
+      } else {
+        pill.classList.remove('ok','warn');
+        pill.classList.add('err');
+        pill.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> <span>Google: <b>Not logged in</b></span>';
+        document.getElementById('user-info').style.display = 'none';
+      }
+    }
+
+    function setWalletStatus(ok, addr = '', chainId = '') {
+      const pill = document.getElementById('wallet-status');
+      const box = document.getElementById('wallet-box');
+      const addrEl = document.getElementById('wallet-address');
+      const netInfo = document.getElementById('network-info');
+
+      if (ok) {
+        pill.classList.remove('warn','err');
+        pill.classList.add('ok');
+        pill.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Wallet: <b>Connected</b></span>';
+        box.style.display = 'block';
+        addrEl.textContent = shortAddr(addr);
+        netInfo.textContent = chainId ? `Chain ID: ${chainId}` : '';
+      } else {
+        pill.classList.remove('ok','warn');
+        pill.classList.add('err');
+        pill.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> <span>Wallet: <b>Disconnected</b></span>';
+        box.style.display = 'none';
+      }
+    }
+
+    /* -----------------------
+       ورود با گوگل
+    ----------------------- */
+    function handleGoogleResponse(response) {
+      const data = parseJwt(response.credential);
+      // ذخیره برای بعد
+      localStorage.setItem('googleUser', JSON.stringify({
+        name: data.name,
+        picture: data.picture,
+        email: data.email,
+        sub: data.sub
+      }));
+      isLoggedIn = true;
+      setGoogleStatus(true, data.name, data.picture);
+      enableGameIfReady();
+    }
+
+    function parseJwt(token) {
+      let base64Url = token.split('.')[1];
+      let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      let jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
+
+    function restoreGoogle() {
+      const saved = localStorage.getItem('googleUser');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          isLoggedIn = true;
+          setGoogleStatus(true, u.name, u.picture);
+        } catch {
+          // اگر خراب بود پاک کن
+          localStorage.removeItem('googleUser');
+        }
+      } else {
+        setGoogleStatus(false);
+      }
+    }
+
+    /* -----------------------
+       اتصال کیف پول (MetaMask)
+    ----------------------- */
+    async function connectWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        alert('لطفاً MetaMask را نصب کنید.');
+        return;
+      }
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const addr = accounts[0];
+        let chainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+        // اگر شبکه موردنیاز نیست، تلاش برای سوییچ
+        if (REQUIRED_CHAIN_HEX && chainId !== REQUIRED_CHAIN_HEX) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: REQUIRED_CHAIN_HEX }]
+            });
+            chainId = REQUIRED_CHAIN_HEX;
+          } catch (switchErr) {
+            // اگر نتونه سوییچ کنه، فقط هشدار بده اما اتصال رو نگه دار
+            console.warn('Could not switch network:', switchErr);
+          }
+        }
+
+        walletConnected = true;
+        localStorage.setItem('walletAddress', addr);
+        localStorage.setItem('walletChainId', chainId || '');
+        setWalletStatus(true, addr, chainId);
+        enableGameIfReady();
+
+        // لیسنرها برای تغییر آدرس/شبکه
+        setupWalletListeners();
+      } catch (err) {
+        console.error(err);
+        walletConnected = false;
+        setWalletStatus(false);
+        enableGameIfReady();
+      }
+    }
+
+    function setupWalletListeners() {
+      if (!window.ethereum) return;
+      // تغییر آدرس
+      window.ethereum.removeAllListeners?.('accountsChanged');
+      window.ethereum.removeAllListeners?.('chainChanged');
+
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts && accounts.length) {
+          const addr = accounts[0];
+          localStorage.setItem('walletAddress', addr);
+          setWalletStatus(true, addr, localStorage.getItem('walletChainId') || '');
+        } else {
+          // قطع اتصال
+          localStorage.removeItem('walletAddress');
+          localStorage.removeItem('walletChainId');
+          walletConnected = false;
+          setWalletStatus(false);
+          enableGameIfReady();
+        }
+      });
+
+      window.ethereum.on('chainChanged', (chainId) => {
+        localStorage.setItem('walletChainId', chainId);
+        const addr = localStorage.getItem('walletAddress');
+        setWalletStatus(true, addr || '', chainId || '');
+      });
+    }
+
+    function restoreWalletUI() {
+      const addr = localStorage.getItem('walletAddress');
+      const chainId = localStorage.getItem('walletChainId');
+      if (addr) {
+        // توجه: بدون تعامل کاربر، MetaMask ممکنه اجازه تراکنش نده؛ این فقط UI رو برمی‌گردونه
+        walletConnected = true;
+        setWalletStatus(true, addr, chainId || '');
+        setupWalletListeners();
+      } else {
+        setWalletStatus(false);
+      }
+    }
+
+    /* -----------------------
+       خروج
+    ----------------------- */
+    function logoutAll() {
+      localStorage.removeItem('googleUser');
+      localStorage.removeItem('walletAddress');
+      localStorage.removeItem('walletChainId');
+      isLoggedIn = false;
+      walletConnected = false;
+      setGoogleStatus(false);
+      setWalletStatus(false);
+      enableGameIfReady();
+      // برای تمیز شدن UI بازی (اختیاری: می‌تونی امتیاز رو پاک نکنی)
+      // location.reload(); // اگر می‌خوای کامل ریست بشه
+    }
+
+    /* -----------------------
+       کپی آدرس
+    ----------------------- */
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('copy-address');
+        const old = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => (btn.textContent = 'Copy'), 1000);
+      } catch (e) {
+        alert('Copy failed');
+      }
+    }
+
+    /* -----------------------
+       بایند رویدادها و بازیابی
+    ----------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      // بازیابی وضعیت‌ها
+      restoreGoogle();
+      restoreWalletUI();
+      enableGameIfReady();
+
+      // رویدادهای UI
+      document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+      document.getElementById('logout-all').addEventListener('click', logoutAll);
+      document.getElementById('copy-address').addEventListener('click', () => {
+        const addr = localStorage.getItem('walletAddress');
+        if (addr) copyText(addr);
+      });
+    });
+  </script>
+</body>
+</html>
