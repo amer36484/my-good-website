@@ -8,7 +8,7 @@ import math
 pygame.init()
 WIDTH, HEIGHT = 1200, 800
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Realistic Universe Simulator")
+pygame.display.set_caption("Gravity Universe Simulator")
 clock = pygame.time.Clock()
 
 # Colors
@@ -47,18 +47,38 @@ class Planet:
         self.angle = random.uniform(0, 2*math.pi)
         self.color = color
         self.moons = []
+        self.trail = []
 
-    def update(self):
+    def update(self, stars):
+        # Orbit update
         self.angle += self.speed
 
+        # Gravity from black holes
+        for star in stars:
+            if star.type == "blackhole":
+                dx = star.x - (self.star.x + self.distance*math.cos(self.angle))
+                dy = star.y - (self.star.y + self.distance*math.sin(self.angle))
+                dist_sq = dx*dx + dy*dy
+                if dist_sq > 0:
+                    force = 50/dist_sq  # simple gravity scale
+                    self.angle += force * 0.01
+
     def draw(self, screen, zoom, offset_x, offset_y):
-        # Orbit calculation with simple circular motion
         x = self.star.x + self.distance*math.cos(self.angle)
         y = self.star.y + self.distance*math.sin(self.angle)
-        pygame.draw.circle(screen, self.color,
-                           (int(x*zoom + offset_x), int(y*zoom + offset_y)),
-                           max(int(self.size*zoom),1))
+
+        # Trail
+        self.trail.append((int(x*zoom + offset_x), int(y*zoom + offset_y)))
+        if len(self.trail) > 50:
+            self.trail.pop(0)
+        for i, pos in enumerate(self.trail):
+            alpha = int(255 * i / len(self.trail))
+            pygame.draw.circle(screen, self.color, pos, max(int(self.size*zoom*0.5),1))
+
+        pygame.draw.circle(screen, self.color, (int(x*zoom + offset_x), int(y*zoom + offset_y)), max(int(self.size*zoom),1))
+
         for moon in self.moons:
+            moon.update()
             moon.draw(screen, zoom, offset_x + (x - self.star.x)*zoom,
                       offset_y + (y - self.star.y)*zoom)
 
@@ -70,14 +90,19 @@ class Moon:
         self.speed = speed
         self.angle = random.uniform(0, 2*math.pi)
         self.color = color
+        self.trail = []
 
     def update(self):
         self.angle += self.speed
 
     def draw(self, screen, zoom, offset_x, offset_y):
-        self.angle += self.speed
         x = offset_x + self.distance*math.cos(self.angle)
         y = offset_y + self.distance*math.sin(self.angle)
+        self.trail.append((int(x), int(y)))
+        if len(self.trail) > 20:
+            self.trail.pop(0)
+        for i, pos in enumerate(self.trail):
+            pygame.draw.circle(screen, self.color, pos, max(int(self.size*zoom*0.5),1))
         pygame.draw.circle(screen, self.color, (int(x), int(y)), max(int(self.size*zoom),1))
 
 # ------------------------------
@@ -86,10 +111,9 @@ class Moon:
 stars = []
 galaxy_centers = [(-400, -300), (500, 200), (0, 0)]
 for gx, gy in galaxy_centers:
-    for i in range(50):  # 50 stars per galaxy
+    for i in range(50):
         angle = random.uniform(0, 2*math.pi)
         radius = random.uniform(50, 200)
-        # Spiral rotation effect
         x = gx + radius * math.cos(angle)
         y = gy + radius * math.sin(angle)
         star_type = random.choices(
@@ -105,7 +129,7 @@ for gx, gy in galaxy_centers:
         star = Star(x, y, color, size, star_type)
         stars.append(star)
 
-        # Add planets for main stars
+        # Planets for main stars
         if star_type=="main":
             num_planets = random.randint(1, 4)
             for j in range(num_planets):
@@ -126,7 +150,7 @@ for gx, gy in galaxy_centers:
                 star.planets.append(planet)
 
 # ------------------------------
-# Camera / Zoom
+# Camera
 # ------------------------------
 zoom = 0.05
 offset_x = WIDTH//2
@@ -141,8 +165,8 @@ running = True
 while running:
     clock.tick(60)
     screen.fill(BLACK)
-
     keys = pygame.key.get_pressed()
+
     # Camera movement
     if keys[pygame.K_a]:
         offset_x += camera_speed
@@ -164,21 +188,21 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Rotate galaxies slightly for realism
+    # Rotate galaxies
     for i, (gx, gy) in enumerate(galaxy_centers):
         for star in stars[i*50:(i+1)*50]:
             dx, dy = star.x - gx, star.y - gy
-            angle = 0.002  # Galaxy rotation speed
+            angle = 0.002
             cos_ang = math.cos(angle)
             sin_ang = math.sin(angle)
             star.x = gx + dx*cos_ang - dy*sin_ang
             star.y = gy + dx*sin_ang + dy*cos_ang
 
-    # Draw stars and planets
+    # Draw stars and planets with gravity
     for star in stars:
         star.draw(screen, zoom, offset_x, offset_y)
         for planet in star.planets:
-            planet.update()
+            planet.update(stars)
             planet.draw(screen, zoom, offset_x, offset_y)
 
     pygame.display.flip()
