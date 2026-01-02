@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sayı Tahmin Yarışı</title>
+    
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Sayı Tahmini</h1>
+    <p>1 ile 100 arasında bir sayı tuttum. Bakalım bulabilecek misin?</p>
+    
+    <input type="number" id="guessInput" placeholder="??">
+    <br>
+    <button onclick="checkGuess()">Tahmin Et!</button>
+
+    <div id="message"></div>
+    
+    <div class="stats">
+        Kalan Can: <span id="lives">7</span> | Deneme: <span id="attempts">0</span>
+    </div>
+</div>
+
+<script>
+    let targetNumber = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+    let lives = 7;
+
+    function checkGuess() {
+        const input = document.getElementById('guessInput');
+        const message = document.getElementById('message');
+        const guess = parseInt(input.value);
+
+        if (isNaN(guess) || guess < 1 || guess > 100) {
+            message.textContent = "Lütfen 1-100 arası bir sayı gir!";
+            return;
+        }
+
+        attempts++;
+        document.getElementById('attempts').textContent = attempts;
+
+        if (guess === targetNumber) {
+            message.innerHTML = "🎉 TEBRİKLER! <br> Doğru tahmin!";
+            message.style.color = "#4ee44e";
+            disableGame();
+        } else {
+            lives--;
+            document.getElementById('lives').textContent = lives;
+            
+            if (lives === 0) {
+                message.innerHTML = "💥 OYUN BİTTİ! <br> Sayı: " + targetNumber;
+                message.style.color = "#ff4d6d";
+                disableGame();
+            } else {
+                message.textContent = guess > targetNumber ? "Daha KÜÇÜK bir sayı!" : "Daha BÜYÜK bir sayı!";
+                message.style.color = "#f9ed69";
+            }
+        }
+        input.value = "";
+        input.focus();
+    }
+
+    function disableGame() {
+        document.querySelector('button').disabled = true;
+        document.getElementById('guessInput').disabled = true;
+    }
+</script>
+
+</body>
+</html>
